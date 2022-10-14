@@ -56,7 +56,7 @@ double AI::minimax(Board board, std::vector<mMove> node, bool m_player, int dept
 
 }
 
-void AI::make_move(Board& board) {
+std::vector<mMove> AI::make_move(Board& board) {
     std::vector<std::vector<mMove> > nodes = board.get_moves(player);
     if (player) {
         double best_value = MMIN; int counter = 0, right_move = 0;
@@ -67,8 +67,7 @@ void AI::make_move(Board& board) {
                 right_move = counter;
             }
         }
-        for (std::vector<mMove>::iterator i = nodes[right_move].begin(); i != nodes[right_move].end(); i++)
-            board.move(*i);
+        return nodes[right_move];
     }
     else {
         double best_value = MMAX; int counter = 0, right_move = 0;
@@ -79,8 +78,7 @@ void AI::make_move(Board& board) {
                 right_move = counter;
             }
         }
-        for (std::vector<mMove>::iterator i = nodes[right_move].begin(); i != nodes[right_move].end(); i++)
-            board.move(*i);
+        return nodes[right_move];
     }
 }
 

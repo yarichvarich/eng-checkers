@@ -16,7 +16,7 @@ struct AI {
 
     double minimax(Board board, std::vector<mMove> node, bool m_player, int depth, double alpha, double beta);
 
-    void make_move(Board& board);
+    std::vector<mMove> make_move(Board& board);
 };
 
 #endif

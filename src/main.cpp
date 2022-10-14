@@ -44,7 +44,20 @@ AI bot{1};
 
 std::vector<std::vector<mMove> > moves;
 
-void render_board(sf::RenderWindow &window);
+sf::Texture texture;
+sf::Sprite buff;
+
+std::vector<mMove> moves_to_animate;
+int animation_frames = 1000;
+int current_frame;
+sf::Vector2f velocity;
+sf::Vector2f c_pos;
+
+void render_board(sf::RenderWindow &window, Board& board);
+
+void render_moves(sf::RenderWindow &window);
+
+void render_move(mMove m, sf::RenderWindow& window, char piece);
 
 int is_in_moves(int x, int y);
 
@@ -137,8 +150,19 @@ int main()
             }
 
             if(GAME_STATE == SELECT_MOVE && player_turn == bot.player && ai_mode) {
-                bot.make_move(board);
+                moves_to_animate = bot.make_move(board);
+                std::reverse(moves_to_animate.begin(), moves_to_animate.end());
+                Board temp{board};
+                temp.get_state()[moves_to_animate.back().py][moves_to_animate.back().px] = 'e';
+
+                render_board(window, temp);
+                texture.create(width, height);
+                moves.clear();
+                texture.update(window);
+                buff = sf::Sprite{texture};
                 player_turn ^= 1;
+                
+                GAME_STATE = ANIMATION_START;
             }
 
             if(event.type == sf::Event::MouseButtonReleased && GAME_STATE == SELECT_MOVE) {
@@ -170,11 +194,19 @@ int main()
                         int move = is_in_moves(x, y);
 
                         if(move >= 0) {
+                            moves_to_animate = moves[move];
+                            std::reverse(moves_to_animate.begin(), moves_to_animate.end());
+                            Board temp{board};
+                            temp.get_state()[moves[move].front().py][moves[move].front().px] = 'e';
 
-                            board.apply_sq(moves[move]);
+                            render_board(window, temp);
+                            texture.create(width, height);
                             moves.clear();
+                            texture.update(window);
+                            buff = sf::Sprite{texture};
                             player_turn ^= 1;
-
+                            
+                            GAME_STATE = ANIMATION_START;
                         }
                     }
 
@@ -271,11 +303,14 @@ int main()
 
             case SELECT_MOVE:
             {
-                render_board(window);
+                render_board(window, board);
             }
             break;
 
             case ANIMATION_START:
+            {
+                render_moves(window);
+            }
             break;
 
             case ANIMATION_END:
@@ -313,7 +348,7 @@ int is_in_moves(int x, int y) {
 
 }
 
-void render_board(sf::RenderWindow &window) {
+void render_board(sf::RenderWindow &window, Board& board) {
     int offset = 10;
 
     sf::RectangleShape rect{sf::Vector2f(width/8, height/8)};
@@ -374,4 +409,62 @@ void render_board(sf::RenderWindow &window) {
         }
 
     }
+}
+
+void render_move(mMove m, sf::RenderWindow& window, char piece) {
+    window.draw(buff);
+    float offset = 10;
+    sf::CircleShape c{width/16 - offset}, i_c{width/32 - offset};
+
+    if(piece == 'b' || piece == 'q'){
+        c.setFillColor(sf::Color::Black);
+    }
+    if(piece == 'w' || piece == 'v'){
+        c.setFillColor(sf::Color::Red);
+    }
+    i_c.setFillColor(sf::Color::Green);
+
+    sf::Vector2f a{(float)(m.x - m.px), (float)(m.y - m.py)};
+    float d = sqrt(2) * (width/8);
+    if(board.get_state()[m.y][m.x] != 'e')
+        d*=2;
+    float a_mag = 4*d / ((animation_frames)*(animation_frames)); 
+
+    a /= sqrt(a.x*a.x + a.y*a.y);
+    a *= a_mag;
+
+    if(current_frame <= animation_frames / 2)
+        velocity += a;
+    else
+        velocity -=a;
+    c_pos += velocity;
+
+    c.setPosition(c_pos);
+    window.draw(c);
+    i_c.setPosition(sf::Vector2f{width/32, height/32} + c_pos);
+    if(piece == 'v' || piece == 'q')
+        window.draw(i_c);
+
+    current_frame++;
+}
+
+void render_moves(sf::RenderWindow &window) {
+    float offset = 10;
+    if(current_frame == 0) {
+        velocity = sf::Vector2f{0,0};
+        c_pos = sf::Vector2f{moves_to_animate.back().px*width/8 + offset, moves_to_animate.back().py*height/8 + offset};
+    }
+
+    board.get_state()[moves_to_animate.back().py][moves_to_animate.back().px];
+
+    if(current_frame > animation_frames) {
+        board.move(moves_to_animate.back());
+        moves_to_animate.pop_back();
+        current_frame = 0;
+    }
+    if(moves_to_animate.empty()) {
+        GAME_STATE = SELECT_MOVE;
+        return;
+    }
+    render_move(moves_to_animate.back(), window, board.get_state()[moves_to_animate.back().py][moves_to_animate.back().px]);
 }
