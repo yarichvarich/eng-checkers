@@ -10,7 +10,7 @@ struct AI {
 
     bool player = 0;
 
-    int difficulty = 13;
+    int difficulty = 5;
 
     AI(int p);
 

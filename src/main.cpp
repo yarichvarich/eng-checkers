@@ -40,6 +40,7 @@ const int width = 800;
 const int height = 800;
 
 Board board{};
+AI bot{1};
 
 std::vector<std::vector<mMove> > moves;
 
@@ -99,6 +100,7 @@ int main()
                         event.key.code = sf::Keyboard::Space;
                     }
 
+                    bot.player = black_color;
                 }
 
                 if(GAME_STATE == SELECT_DIFFICULTY) {
@@ -110,6 +112,7 @@ int main()
 
                     if(event.key.code == sf::Keyboard::Enter) {
                         GAME_STATE = SELECT_MOVE;
+                        bot.difficulty = difficulty;
                         event.key.code = sf::Keyboard::Space;
                     }
 
@@ -133,7 +136,12 @@ int main()
 
             }
 
-            if(event.type == sf::Event::MouseButtonReleased) {
+            if(GAME_STATE == SELECT_MOVE && player_turn == bot.player && ai_mode) {
+                bot.make_move(board);
+                player_turn ^= 1;
+            }
+
+            if(event.type == sf::Event::MouseButtonReleased && GAME_STATE == SELECT_MOVE) {
 
                 if(event.mouseButton.button == sf::Mouse::Left) {
 
