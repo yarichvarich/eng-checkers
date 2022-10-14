@@ -1,8 +1,7 @@
 #include <AI.hpp>
-#include <cmath>
 
-double MMIN = -9999999999999999.;
-double MMAX = 9999999999999999.;
+const double MMIN = -9999999999999999.;
+const double MMAX = 9999999999999999.;
 
 double max(double a, double b) {
     return (a >= b)? a : b;

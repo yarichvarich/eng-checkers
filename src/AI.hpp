@@ -3,6 +3,9 @@
 
 #include <Board.hpp>
 
+extern const double MMIN;
+extern const double MMAX;
+
 struct AI {
 
     bool player = 0;

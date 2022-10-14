@@ -4,14 +4,19 @@
 #include <vector>
 #include <string>
 #include <Move.hpp>
+#include <iostream>
 
-extern const double MMIN;
-extern const double MMAX;
 extern const std::vector<std::string> START_POSITION;
 
 
+extern std::string w;//"\u2B24";
+extern std::string b;//"\u25EF";
+extern std::string v; //"\u25A0";
+extern std::string q;//"\u25A1";
+
+
 template<typename T>
-std::vector<T> merge_vectors(vector<T>& A, vector<T>& B);
+std::vector<T> merge_vectors(std::vector<T>& A, std::vector<T>& B);
 
 class Board {
 
@@ -53,10 +58,9 @@ public:
 
     void moves_of_piece(std::vector<std::vector<mMove> >& seq, int x, int y, std::vector<mMove> p = std::vector<mMove>{});
 
+    void apply_sq(std::vector<mMove>& moves);
+
     std::vector<std::vector<mMove> > get_moves(int player);
-
-    bool player_move(bool player);
-
 };
 
 #endif
